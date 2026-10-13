@@ -1,0 +1,9 @@
+.state/
+test-artifacts/
+node_modules/
+*.log
+dist/
+workspace/
+prompt-investigation/
+archives/
+.DS_Store
