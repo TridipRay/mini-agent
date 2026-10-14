@@ -1,6 +1,6 @@
 {
   "name": "account-claw-local",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -17,6 +17,7 @@
     "postinstall": "node claw/patch-openclaw.mjs node_modules/openclaw"
   },
   "dependencies": {
+    "@anthropic-ai/claude-code": "2.1.299",
     "openclaw": "2026.10.3"
   },
   "allowScripts": {
@@ -24,6 +25,7 @@
     "esbuild@0.28.2": true,
     "koffi@3.3.1": true,
     "protobufjs@7.6.6": true,
-    "@google/genai@2.24.0": true
+    "@google/genai@2.24.0": true,
+    "@anthropic-ai/claude-code@2.1.299": true
   }
 }

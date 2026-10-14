@@ -4,13 +4,14 @@ import { mkdir, chmod } from 'node:fs/promises';
 import { Store } from '../store.mjs';
 
 export const OPENCLAW_VERSION = '2026.10.3';
-export function childEnvironment(environment, { stateDirectory, configFile, hostId }) {
+export function childEnvironment(environment, { stateDirectory, configFile, hostId, claudeDirectory }) {
   const result = { ...environment, OPENCLAW_STATE_DIR: stateDirectory, OPENCLAW_CONFIG_PATH: configFile,
-    OPENCLAW_PROFILE: 'account-claw', ACCOUNT_CLAW_HOST_ID: hostId };
+    OPENCLAW_PROFILE: 'account-claw', ACCOUNT_CLAW_HOST_ID: hostId, ...(claudeDirectory ? { CLAUDE_CONFIG_DIR: claudeDirectory } : {}) };
   // Account mode must not accidentally fall back to an API key inherited from a shell.
   for (const key of Object.keys(result)) {
-    if (/(?:API_KEY|API_TOKEN)$/.test(key) || ['OPENCLAW_AGENT_DIR', 'PI_CODING_AGENT_DIR', 'OPENCLAW_GATEWAY_TOKEN', 'OPENCLAW_GATEWAY_PASSWORD'].includes(key)) delete result[key];
+    if (/^(?:ANTHROPIC_|CLAUDE_)/.test(key) || /(?:API_KEY|API_TOKEN)$/.test(key) || ['ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL', 'CLAUDE_CODE_OAUTH_TOKEN', 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR', 'CLAUDE_CODE_API_KEY_FILE_DESCRIPTOR', 'CLAUDECODE', 'OPENCLAW_AGENT_DIR', 'PI_CODING_AGENT_DIR', 'OPENCLAW_GATEWAY_TOKEN', 'OPENCLAW_GATEWAY_PASSWORD'].includes(key)) delete result[key];
   }
+  if (claudeDirectory) result.CLAUDE_CONFIG_DIR = claudeDirectory;
   return result;
 }
 export async function configure({ root, environment = process.env }) {
@@ -43,6 +44,8 @@ export async function configure({ root, environment = process.env }) {
     await store.write('openclaw.json', config);
   }
   if (!config || typeof config !== 'object' || Array.isArray(config) || !config.gateway) throw new Error('Invalid Account Claw configuration.');
-  return { dataDirectory, stateDirectory, hostId: host.id, workspace: config.agents?.defaults?.workspace ?? workspace,
+  const claudeDirectory = path.join(dataDirectory, 'claude');
+  await mkdir(claudeDirectory, { recursive: true, mode: 0o700 });
+  return { claudeDirectory, dataDirectory, stateDirectory, hostId: host.id, workspace: config.agents?.defaults?.workspace ?? workspace,
     port: config.gateway.port, configFile: path.join(stateDirectory, 'openclaw.json') };
 }

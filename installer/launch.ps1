@@ -1,4 +1,4 @@
-param([ValidateSet('start', 'doctor', 'setup', 'login', 'login-codex', 'dashboard', 'service-install', 'claw')][string]$Command = 'start')
+param([ValidateSet('start', 'doctor', 'setup', 'login', 'login-claude', 'claude-status', 'login-codex', 'dashboard', 'service-install', 'claw')][string]$Command = 'start')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $name = (Get-Content -Raw -LiteralPath (Join-Path $root 'active-release.txt')).Trim()

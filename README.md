@@ -4,9 +4,17 @@ An account-backed local assistant distribution built from Mini Agent's v0.1.0 ba
 
 This is an integration distribution, not a reimplementation of every OpenClaw subsystem. The initial account route is OpenClaw's official SIWC method using public Responses API calls. Each user signs in and authorizes their own account; Mini Agent's credentials and the existing machine's OpenClaw profiles are not copied.
 
+## Claude subscription support
+
+Version 0.2.1 adds a private Claude Code 2.1.299 runtime. Use `account-claw login-claude` (or the Sign in to Claude launcher) to complete Claude Code's browser sign-in and select the native Claude backend. `account-claw claude-status` checks the account. OpenClaw delegates to Claude Code; it does not copy or forward the native login tokens. Your ChatGPT login stays available: use the dashboard model selector, or `account-claw claw models set openai/gpt-6.1-sol`, to switch back. Claude sessions use the `claude-cli` provider. Cron jobs can select an explicit Claude model using OpenClaw's `--model` option.
+
+The Claude login is isolated in the installation's `data/claude` directory. Reinstallation keeps it. Existing gateways must be restarted to pick up the new private runtime and environment. Model API keys, alternate Anthropic endpoints and cloud-provider environment switches are removed from child processes so this account route cannot silently fall back to API billing.
+
+Anthropic's [current plan support](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan) describes subscription usage for CLI/SDK/third-party apps. This is native Claude Code delegation, not a custom Claude OAuth implementation. Account entitlements, limits, and optional integration credentials still apply. See [OpenClaw's Claude backend](https://docs.openclaw.ai/providers/anthropic).
+
 ## Install and first use
 
-Download the macOS, Linux, or Windows ZIP from [Account Claw releases](https://github.com/TridipRay/mini-agent/releases/tag/account-claw-v0.2.0). See the [installer guide](installer/README.md) for launch shortcuts. Extract the Account-Claw installer ZIP and run `Install.command` on macOS, `sh install.sh` on Linux, or `Install Windows.cmd` on native Windows. The installer downloads private Node 24.21.0 and pinned OpenClaw dependencies. No existing desktop app or global OpenClaw update is required.
+Download the macOS, Linux, or Windows ZIP from [Account Claw releases](https://github.com/TridipRay/mini-agent/releases/tag/account-claw-v0.2.1). See the [installer guide](installer/README.md) for launch shortcuts. Extract the Account-Claw installer ZIP and run `Install.command` on macOS, `sh install.sh` on Linux, or `Install Windows.cmd` on native Windows. The installer downloads private Node 24.21.0 and pinned OpenClaw dependencies. No existing desktop app or global OpenClaw update is required.
 
 On macOS/Linux:
 

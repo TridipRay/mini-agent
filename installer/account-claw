@@ -9,6 +9,7 @@ export ACCOUNT_CLAW_WORKSPACE_DIR="$root/workspace"
 if [ "$#" -eq 0 ]; then
   case "$(basename -- "$0")" in
     'Sign in to ChatGPT.command') set -- login ;;
+    'Sign in to Claude.command') set -- login-claude ;;
     'Open Dashboard.command') set -- dashboard ;;
   esac
 fi

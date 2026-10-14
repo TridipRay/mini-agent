@@ -17,6 +17,8 @@ Linux commands (open a second terminal for the dashboard):
 "$HOME/.local/share/account-claw/bin/account-claw" dashboard
 ```
 
+To use Claude instead, choose **Sign in to Claude.command** on macOS or **1b - Sign in to Claude** in the Windows Start Menu. On Linux run the installed launcher with `login-claude`. This uses the private Claude Code runtime and then selects OpenClaw's native Claude backend. Your ChatGPT login is retained; switch models in the dashboard. `claude-status` checks the Claude login. Stop and restart an existing gateway after upgrading to this release.
+
 Sign-in opens an authorization page where you choose your ChatGPT account. Keep the gateway terminal open while using the tool or running scheduled jobs. On later launches, skip sign-in unless the account needs reconnection. The dashboard uses your default browser.
 
 The private runtime is OpenClaw 2026.10.3 and Node.js 24.21.0. Existing OpenClaw installations and credentials are kept separate. Default installation directories are `~/.local/share/account-claw` (macOS/Linux) and `%LOCALAPPDATA%\AccountClaw` (Windows). The universal ZIP contains installers for all platforms.

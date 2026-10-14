@@ -27,10 +27,12 @@ test('fresh account profile is private and preserves operator settings on subseq
 });
 
 test('child account mode cannot inherit API-key billing or another agent directory', () => {
-  const env=childEnvironment({OPENAI_API_KEY:'fixture',ANTHROPIC_API_KEY:'fixture',OPENCLAW_AGENT_DIR:'/unrelated',SLACK_BOT_TOKEN:'channel-fixture'},
-    {stateDirectory:'/private-profile',configFile:'/private-profile/config.json'});
+  const env=childEnvironment({OPENAI_API_KEY:'fixture',ANTHROPIC_API_KEY:'fixture',ANTHROPIC_AUTH_TOKEN:'fixture',CLAUDE_CODE_USE_VERTEX:'1',CLAUDE_CODE_OAUTH_TOKEN:'fixture',OPENCLAW_AGENT_DIR:'/unrelated',SLACK_BOT_TOKEN:'channel-fixture'},
+    {stateDirectory:'/private-profile',configFile:'/private-profile/config.json',claudeDirectory:'/private-profile/claude'});
   assert.equal(env.OPENAI_API_KEY,undefined); assert.equal(env.ANTHROPIC_API_KEY,undefined);
   assert.equal(env.OPENCLAW_AGENT_DIR,undefined); assert.equal(env.OPENCLAW_STATE_DIR,'/private-profile');
+  assert.equal(env.CLAUDE_CONFIG_DIR,'/private-profile/claude'); assert.equal(env.ANTHROPIC_AUTH_TOKEN,undefined); assert.equal(env.CLAUDE_CODE_USE_VERTEX,undefined); assert.equal(env.CLAUDE_CODE_OAUTH_TOKEN,undefined);
+  assert.deepEqual(invocation('login-claude',[],18889),['models','auth','login','--provider','anthropic','--method','cli','--set-default']);
   assert.equal(env.SLACK_BOT_TOKEN,'channel-fixture');
   assert.ok(invocation('login',[],18889).includes('siwc'));
   assert.throws(()=>invocation('unsupported',[],18889),/Usage/);

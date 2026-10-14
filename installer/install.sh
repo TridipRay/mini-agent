@@ -85,7 +85,7 @@ JS
 if [ "$(uname -s)" = Darwin ]; then
   cp "$prefix/bin/account-claw" "$prefix/bin/Launch Account Claw.command"
   chmod 755 "$prefix/bin/Launch Account Claw.command"
-  for name in 'Sign in to ChatGPT.command' 'Open Dashboard.command'; do
+  for name in 'Sign in to ChatGPT.command' 'Sign in to Claude.command' 'Open Dashboard.command'; do
     cp "$prefix/bin/account-claw" "$prefix/bin/$name"
     chmod 755 "$prefix/bin/$name"
   done
