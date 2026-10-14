@@ -1,3 +1,19 @@
+# Mini Agent — ChatGPT and Claude development version
+
+Version 0.1.1 adds Claude subscription support alongside ChatGPT. The frozen Mini Agent v0.1.0 release remains unchanged; this code is on `mini-agent-development`.
+
+Select **Claude** in the Provider selector, then **Continue with Claude**. Claude Code opens its own browser sign-in and owns credential storage and refresh. After authorization, choose a model and workspace, and start a conversation. You can also use the installed launcher's `claude-login` command, then **Refresh Claude sign-in status** in the UI. `claude-status` checks the current login. Sign in with a subscription account, rather than an Anthropic Console account.
+
+The Claude runtime and Agent SDK are privately installed and pinned. Login state is isolated in `data/claude` (or `.state/claude` in the development checkout). Claude conversations are stored separately and bound to the native account identity. ChatGPT sign-in and Codex conversations stay available when switching providers. Claude's native permission requests and questions appear in the existing approval UI; project/user settings are not automatically imported into this SDK host.
+
+Claude uses its own tool permission engine. Its permission checks are not Codex's OS sandbox. This version keeps manual approvals for Claude changes and shell commands; the Codex workspace-write selector does not apply to Claude. Inherited Anthropic API keys, token overrides, alternate endpoints and cloud-provider switches are removed from the Claude process environment.
+
+Anthropic's [current subscription support](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan) includes SDK, headless CLI and third-party usage. Native Claude delegation is used here; the app implements no custom Claude OAuth flow. Account limits and entitlements apply. Live Claude inference still requires the user to sign in and test the selected account.
+
+Development setup: `npm ci`, then `npm start`. The dual-provider installer includes private Codex and Claude runtimes; use the same per-platform install steps below.
+
+---
+
 # Mini Agent
 
 A stripped-down local agent client: ChatGPT account sign-in, workspace selection, streamed responses, additional instructions, file/tool activity, explicit approval prompts, stop, conversation resumption, and a request inspector. No npm dependencies are needed.

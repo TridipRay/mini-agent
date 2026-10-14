@@ -14,6 +14,13 @@ async function refresh() {
 }
 function renderState() {
   const selected = state.auth.selected;
+  const claude = state.provider === 'claude';
+  $('provider').value = state.provider ?? 'openai';
+  $('login').textContent = claude ? 'Continue with Claude' : 'Continue with ChatGPT';
+  $('add-account').hidden = claude; $('claude-status').hidden = !claude;
+  $('sandbox').options[0].textContent = claude ? 'Claude permissions · ask before changes' : 'Read-only · request approval for changes';
+  $('sandbox').options[1].hidden = claude;
+  if (claude) $('sandbox').value = 'read-only';
   $('accounts').replaceChildren(...state.auth.accounts.map(account => {
     const option = document.createElement('option'); option.value = account.key; option.textContent = account.label; return option;
   }));
@@ -27,9 +34,9 @@ function renderState() {
   for (const item of state.agent.items ?? []) threadItem(item);
   $('send').disabled = !signedIn || !state.agent.threadId || busy || state.authPending;
   $('stop').disabled = !busy || !state.agent.turnId;
-  for (const id of ['new-thread', 'accounts', 'login', 'add-account', 'logout', 'reload-models']) $(id).disabled = busy || state.authPending;
+  for (const id of ['new-thread', 'accounts', 'login', 'add-account', 'logout', 'reload-models', 'provider', 'claude-status']) $(id).disabled = busy || state.authPending;
   $('cancel-login').hidden = !state.authPending;
-  $('status').textContent = state.authPending ? 'Waiting for browser sign-in…' : busy ? 'Agent is working · approvals appear below' : signedIn ? 'Connected account · ready' : 'Continue with ChatGPT to begin';
+  $('status').textContent = state.authPending ? 'Waiting for browser sign-in…' : busy ? 'Agent is working · approvals appear below' : signedIn ? 'Connected account · ready' : `Continue with ${claude ? 'Claude' : 'ChatGPT'} to begin`;
   if (!$('workspace').value) $('workspace').value = state.defaultWorkspace;
   $('context').textContent = state.agent.threadId ? `Thread ${state.agent.threadId.slice(0, 10)}` : 'No conversation selected';
   $('threads').replaceChildren(...state.agent.threads.map(thread => {
@@ -128,11 +135,13 @@ function event(event) {
   activity.push({ type, data }); activity = activity.slice(-50); $('activity').textContent = JSON.stringify(activity, null, 2);
   if (type === 'error') showError(data.message);
 }
-$('login').onclick = () => task(async () => { const result = await api('login'); window.location.assign(result.url); });
-$('add-account').onclick = () => task(async () => { const result = await api('login', { addAccount: true }); window.location.assign(result.url); });
+$('login').onclick = () => task(async () => { const result = await api('login'); if (result.url) window.location.assign(result.url); else await refresh(); });
+$('add-account').onclick = () => task(async () => { const result = await api('login', { addAccount: true }); if (result.url) window.location.assign(result.url); else await refresh(); });
 $('cancel-login').onclick = () => task(async () => { await api('login/cancel'); await refresh(); });
-$('logout').onclick = () => task(async () => { const result = await api('logout'); await refresh(); if (!result.revoked) showError('Signed out locally. Remote revocation was not confirmed; disconnect this app in ChatGPT Settings.'); });
+$('logout').onclick = () => task(async () => { const result = await api('logout'); await refresh(); if (!result.revoked && !result.nativeLogout) showError('Signed out locally. Remote revocation was not confirmed; disconnect this app in ChatGPT Settings.'); });
 $('accounts').onchange = () => task(async () => { await api('account', { key: $('accounts').value }); await refresh(); await loadModels(); });
+$('provider').onchange = () => task(async () => { await api('provider', { provider: $('provider').value }); $('model').replaceChildren(); await refresh(); if (state.auth.selected) await loadModels(); });
+$('claude-status').onclick = () => task(async () => { await api('claude/status'); await refresh(); if (state.auth.selected) await loadModels(); });
 $('reload-models').onclick = () => task(loadModels);
 $('new-thread').onclick = () => task(async () => { await api('thread', { model: $('model').value, cwd: $('workspace').value, sandbox: $('sandbox').value, instructions: $('instructions').value }); await refresh(); });
 $('stop').onclick = () => task(() => api('interrupt'));

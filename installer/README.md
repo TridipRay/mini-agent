@@ -1,3 +1,9 @@
+# Claude support in Mini Agent 0.1.1
+
+This installer includes both private Codex and Claude Agent SDK runtimes. After launch, select **ChatGPT** or **Claude** in the Provider selector. **Continue with Claude** launches Claude Code's own subscription sign-in. Complete the browser flow yourself, then choose a model and workspace. No Anthropic API key is needed for this route.
+
+The installed launcher also accepts `claude-login` and `claude-status` commands (on Windows, `launch.ps1 -Command claude-login`). Claude login and conversations are kept separately from ChatGPT. Native Claude permission requests are shown in the UI; Codex's OS sandbox does not apply to Claude. The existing frozen Mini Agent release is unaffected.
+
 # Install Mini Agent
 
 This package installs a local browser interface with ChatGPT sign-in, Codex file/tools access, streamed conversations and approval prompts. You do not need Node.js, Codex, the ChatGPT desktop app, an API key or a source checkout already installed.

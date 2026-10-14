@@ -10,7 +10,7 @@ const output = path.resolve(process.argv[2] || path.join(source, 'dist'));
 const { version } = JSON.parse(await readFile(path.join(source, 'package.json'), 'utf8'));
 if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Expected a numeric release version.');
 // Explicit allowlist prevents credentials, histories and research captures entering a release.
-const files = ['package.json', 'server.mjs', 'store.mjs', 'auth.mjs', 'agent.mjs', 'rpc.mjs',
+const files = ['package-lock.json', 'claude-runtime.mjs', 'claude-auth.mjs', 'claude-agent.mjs', 'package.json', 'server.mjs', 'store.mjs', 'auth.mjs', 'agent.mjs', 'rpc.mjs',
   'ui/index.html', 'ui/style.css', 'ui/app.mjs', 'scripts/probe.mjs', 'scripts/launch.mjs', 'scripts/windows-setup.mjs'];
 const temporary = await mkdtemp(path.join(os.tmpdir(), 'mini-agent-package-'));
 const name = `Mini-Agent-${version}`;

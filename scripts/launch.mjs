@@ -1,6 +1,16 @@
 import { spawn } from 'node:child_process';
+import { mkdir } from 'node:fs/promises';
+import path from 'node:path';
+import { claudeBinary, claudeEnvironment } from '../claude-runtime.mjs';
 import { fileURLToPath } from 'node:url';
 const command = process.argv[2] ?? 'start';
+if (['claude-login', 'claude-status'].includes(command)) {
+  const directory = process.env.MINI_AGENT_CLAUDE_CONFIG_DIR || path.join(process.env.MINI_AGENT_DATA_DIR || fileURLToPath(new URL('../.state', import.meta.url)), 'claude');
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  const child = spawn(claudeBinary(), ['auth', command === 'claude-login' ? 'login' : 'status', command === 'claude-login' ? '--claudeai' : '--json'], { stdio: 'inherit', env: claudeEnvironment(process.env, directory) });
+  const code = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', code => resolve(code ?? 1)); });
+  process.exit(code);
+}
 if (!['start', 'doctor'].includes(command)) throw new Error('Usage: mini-agent [start|doctor]');
 const file = fileURLToPath(new URL(command === 'doctor' ? './probe.mjs' : '../server.mjs', import.meta.url));
 const child = spawn(process.execPath, [file], { stdio: ['inherit', 'pipe', 'inherit'], env: process.env });

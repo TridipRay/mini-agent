@@ -1,4 +1,6 @@
-import { spawn } from 'node:child_process';
+import { promisify } from 'node:util';
+import { claudeBinary } from '../claude-runtime.mjs';
+import { spawn, execFile } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { Rpc } from '../rpc.mjs';
@@ -23,3 +25,7 @@ try {
   await writeFile(`${directory}/live-probe.json`, `${JSON.stringify(output, null, 2)}\n`);
   console.log(JSON.stringify({ binary, handshake: 'passed', inferenceTested: false }));
 } finally { await rpc.close(); }
+
+const { stdout: claudeVersion } = await promisify(execFile)(claudeBinary(), ['--version'], { timeout: 15000 });
+if (!claudeVersion.includes('Claude Code')) throw new Error('Claude runtime version check failed.');
+console.log(JSON.stringify({ claudeRuntime: claudeVersion.trim(), inferenceTested: false }));

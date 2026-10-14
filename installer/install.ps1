@@ -43,13 +43,15 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Application verification failed.' }
     $backend = Join-Path $stage 'backend'
     New-Item -ItemType Directory -Path $backend | Out-Null
-    Set-Content -LiteralPath (Join-Path $backend 'package.json') -Encoding ASCII -Value '{"private":true,"dependencies":{"@openai/codex":"0.156.0"}}'
+    Copy-Item (Join-Path $app 'package.json') (Join-Path $backend 'package.json')
+    Copy-Item (Join-Path $app 'package-lock.json') (Join-Path $backend 'package-lock.json')
     $env:PATH = (Join-Path $stage 'runtime') + ';' + $env:PATH
     Write-Host 'Installing private official Codex backend 0.156.0...'
-    & $node (Join-Path $stage 'runtime/node_modules/npm/bin/npm-cli.js') install --prefix $backend --registry=https://registry.npmjs.org --no-audit --no-fund --cache (Join-Path $stage 'npm-cache')
+    & $node (Join-Path $stage 'runtime/node_modules/npm/bin/npm-cli.js') ci --prefix $backend --registry=https://registry.npmjs.org --no-audit --no-fund --cache (Join-Path $stage 'npm-cache')
     if ($LASTEXITCODE -ne 0) { throw 'Codex installation failed.' }
     Remove-Item -LiteralPath (Join-Path $stage 'npm-cache') -Recurse -Force
     $binaryRelative = "backend/node_modules/@openai/codex-win32-$arch/vendor/$triple/bin/codex.exe"
+    $env:MINI_AGENT_CLAUDE_SDK = Join-Path $backend 'node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs'
     $env:MINI_AGENT_CODEX_BIN = Join-Path $stage $binaryRelative
     if (!(Test-Path $env:MINI_AGENT_CODEX_BIN)) { throw 'Official native Codex executable was not installed.' }
     Write-Host 'Checking backend compatibility without sign-in or inference...'

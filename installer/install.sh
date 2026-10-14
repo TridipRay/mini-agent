@@ -52,10 +52,12 @@ cp -R "$bundle/payload" "$stage/app"
 export PATH="$stage/runtime/bin:$PATH"
 node "$bundle/verify.mjs" "$stage/app" "$bundle/manifest.json"
 mkdir "$stage/backend"
-printf '%s\n' '{"private":true,"dependencies":{"@openai/codex":"0.156.0"}}' > "$stage/backend/package.json"
-echo 'Installing private official Codex backend 0.156.0…'
-npm install --prefix "$stage/backend" --registry=https://registry.npmjs.org --no-audit --no-fund --cache "$stage/npm-cache"
+cp "$stage/app/package.json" "$stage/backend/package.json"
+cp "$stage/app/package-lock.json" "$stage/backend/package-lock.json"
+echo 'Installing private Codex and Claude backends…'
+npm ci --prefix "$stage/backend" --registry=https://registry.npmjs.org --no-audit --no-fund --cache "$stage/npm-cache"
 rm -rf "$stage/npm-cache"
+export MINI_AGENT_CLAUDE_SDK="$stage/backend/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs"
 export MINI_AGENT_CODEX_BIN="$stage/backend/node_modules/.bin/codex"
 echo 'Checking backend protocol compatibility (no sign-in or inference)…'
 node "$stage/app/scripts/probe.mjs"

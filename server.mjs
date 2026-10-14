@@ -5,10 +5,13 @@ import { readFile, mkdir } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { Store } from './store.mjs';
 import { Auth } from './auth.mjs';
+import { ClaudeAuth } from './claude-auth.mjs';
+import { ClaudeAgent } from './claude-agent.mjs';
+import { claudeBinary, loadClaudeSdk } from './claude-runtime.mjs';
 import { Agent, findBinary } from './agent.mjs';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
-export async function createApp({ auth, agent, defaultWorkspace }) {
+export async function createApp({ auth, agent, defaultWorkspace, providers = { openai: { auth, agent } } }) {
   const clients = new Set(); let events = [], eventId = 0, queue = Promise.resolve();
   const cookieValue = randomBytes(32).toString('hex');
   let origin;
@@ -18,8 +21,9 @@ export async function createApp({ auth, agent, defaultWorkspace }) {
     const message = `id: ${event.id}\ndata: ${JSON.stringify(event)}\n\n`;
     for (const client of clients) if (!client.destroyed) client.write(message);
   }
-  agent.publish = publish;
-  const state = () => ({ eventId, auth: auth.summary(), agent: agent.summary(),
+  let provider = 'openai';
+  for (const entry of Object.values(providers)) { entry.agent.publish = publish; entry.auth.publish = publish; }
+  const state = () => ({ eventId, provider, providers: Object.keys(providers), auth: auth.summary(), agent: agent.summary(),
     defaultWorkspace, authPending: !!auth.pending, binary: agent.binary,
     requests: events.filter(event => event.type === 'request').slice(-20).map(event => event.data),
     activity: events.filter(event => ['agent', 'diagnostic', 'connection'].includes(event.type)).slice(-30)
@@ -94,8 +98,15 @@ export async function createApp({ auth, agent, defaultWorkspace }) {
       const value = await body(request);
       let result;
       switch (url.pathname) {
-        case '/api/login': result = await serial(async () => { idle(); return { url: await auth.start(`${origin}/auth/callback`, value.addAccount === true) }; }); break;
-        case '/api/login/cancel': auth.pending = null; result = {}; break;
+        case '/api/provider': result = await serial(async () => {
+          idle(); const next = providers[value.provider];
+          if (!next) throw new Error('Unknown account provider.');
+          await agent.disconnect(); auth = next.auth; agent = next.agent; provider = value.provider;
+          if (provider === 'claude') await auth.load(); return {};
+        }); break;
+        case '/api/claude/status': result = await serial(async () => { idle(); if (provider !== 'claude') throw new Error('Select Claude first.'); const previous = auth.state.selected; await auth.load(); if (previous !== auth.state.selected) await agent.disconnect(); return {}; }); break;
+        case '/api/login': result = await serial(async () => { idle(); if (provider === 'claude') await agent.disconnect(); const login = await auth.start(`${origin}/auth/callback`, value.addAccount === true); return typeof login === 'string' ? { url: login } : login; }); break;
+        case '/api/login/cancel': if (auth.cancel) auth.cancel(); else auth.pending = null; result = {}; break;
         case '/api/logout': result = await serial(async () => { idle(); await agent.disconnect(); return auth.logout(); }); break;
         case '/api/account': result = await serial(async () => { idle(); await agent.disconnect(); await auth.select(value.key); return {}; }); break;
         case '/api/models': result = await serial(async () => { idle(); return { models: await auth.models() }; }); break;
@@ -124,7 +135,7 @@ export async function createApp({ auth, agent, defaultWorkspace }) {
     async close() {
       for (const client of clients) client.end();
       if (agent.busy) { try { await agent.interrupt(); } catch { /* Closing the owned process still releases the connection. */ } }
-      if (agent.rpc) await agent.rpc.close();
+      for (const entry of Object.values(providers)) { if (entry.auth.cancel) entry.auth.cancel(); if (entry.agent.rpc) await entry.agent.rpc.close(); }
       server.closeAllConnections(); await new Promise(resolve => server.close(resolve));
     } };
 }
@@ -135,9 +146,14 @@ export async function main() {
   const auth = new Auth({ store }); await auth.load();
   const agent = new Agent({ auth, store, binary: await findBinary(), publish: () => {} }); await agent.load();
   const defaultWorkspace = process.env.MINI_AGENT_WORKSPACE_DIR || path.join(directory, 'workspace'); await mkdir(defaultWorkspace, { recursive: true });
-  const app = await createApp({ auth, agent, defaultWorkspace });
+  const claude = new ClaudeAuth({ binary: claudeBinary(), directory: process.env.MINI_AGENT_CLAUDE_CONFIG_DIR || path.join(dataDirectory, 'claude') });
+  await claude.load();
+  const { query } = await loadClaudeSdk();
+  const claudeAgent = new ClaudeAgent({ auth: claude, store, query }); await claudeAgent.load();
+  claude.models = () => claudeAgent.models();
+  const app = await createApp({ auth, agent, defaultWorkspace, providers: { openai: { auth, agent }, claude: { auth: claude, agent: claudeAgent } } });
   const url = await app.listen(Number(process.env.MINI_AGENT_PORT || 0));
-  console.log(`Mini Agent: ${url}\nOpen this address, then choose Continue with ChatGPT.\nCredentials: ${dataDirectory} (owner-only files).`);
+  console.log(`Mini Agent: ${url}\nOpen this address, then choose ChatGPT or Claude and sign in.\nCredentials: ${dataDirectory} (owner-only files).`);
   const shutdown = async () => { await app.close(); process.exit(0); };
   process.once('SIGINT', shutdown); process.once('SIGTERM', shutdown);
 }
