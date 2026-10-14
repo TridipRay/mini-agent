@@ -12,15 +12,15 @@ test('release packaging excludes private state and verifies the shipped producti
   const temporary = await mkdtemp(path.join(os.tmpdir(), 'mini-agent-distribution-test-'));
   try {
     execFileSync(process.execPath, [path.join(source, 'scripts/build-installer.mjs'), temporary]);
-    const archive = path.join(temporary, 'Mini-Agent-0.1.0.zip');
+    const archive = path.join(temporary, 'Account-Claw-0.2.0.zip');
     const entries = execFileSync('unzip', ['-Z1', archive], { encoding: 'utf8' }).trim().split('\n');
     assert.ok(entries.every(name => !/\.state|test-artifacts|prompt-investigation|node_modules|accounts\.json|threads\.json/.test(name)));
     execFileSync('unzip', ['-q', archive, '-d', temporary]);
-    const bundle = path.join(temporary, 'Mini-Agent-0.1.0');
+    const bundle = path.join(temporary, 'Account-Claw-0.2.0');
     const manifest = JSON.parse(await readFile(path.join(bundle, 'manifest.json'), 'utf8'));
-    assert.equal(Object.keys(manifest.files).length, 12);
-    for (const file of ['Install Windows.cmd', 'install.ps1', 'Launch Mini Agent.cmd', 'launch.ps1']) {
-      assert.ok(entries.includes(`Mini-Agent-0.1.0/${file}`));
+    assert.equal(Object.keys(manifest.files).length, 17);
+    for (const file of ['Install Windows.cmd', 'install.ps1', 'Launch Account Claw.cmd', 'launch.ps1']) {
+      assert.ok(entries.includes(`Account-Claw-0.2.0/${file}`));
     }
     for (const [name, hash] of Object.entries(manifest.files)) {
       assert.equal(createHash('sha256').update(await readFile(path.join(bundle, 'payload', name))).digest('hex'), hash);

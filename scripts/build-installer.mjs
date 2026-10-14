@@ -10,10 +10,10 @@ const output = path.resolve(process.argv[2] || path.join(source, 'dist'));
 const { version } = JSON.parse(await readFile(path.join(source, 'package.json'), 'utf8'));
 if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Expected a numeric release version.');
 // Explicit allowlist prevents credentials, histories and research captures entering a release.
-const files = ['package.json', 'server.mjs', 'store.mjs', 'auth.mjs', 'agent.mjs', 'rpc.mjs',
-  'ui/index.html', 'ui/style.css', 'ui/app.mjs', 'scripts/probe.mjs', 'scripts/launch.mjs', 'scripts/windows-setup.mjs'];
+const files = ['package-lock.json', 'OPENCLAW-LICENSE.txt', 'package.json', 'server.mjs', 'store.mjs', 'auth.mjs', 'agent.mjs', 'rpc.mjs',
+  'ui/index.html', 'ui/style.css', 'ui/app.mjs', 'scripts/probe.mjs', 'scripts/launch.mjs', 'claw/config.mjs', 'claw/cli.mjs', 'claw/patch-openclaw.mjs', 'claw/install-manifest.mjs'];
 const temporary = await mkdtemp(path.join(os.tmpdir(), 'mini-agent-package-'));
-const name = `Mini-Agent-${version}`;
+const name = `Account-Claw-${version}`;
 const root = path.join(temporary, name);
 const manifest = { version, files: {} };
 try {
@@ -26,8 +26,8 @@ try {
     await copyFile(original, destination); await chmod(destination, 0o644);
     manifest.files[file] = createHash('sha256').update(await readFile(original)).digest('hex');
   }
-  for (const file of ['install.sh', 'Install.command', 'mini-agent', 'verify.mjs',
-    'install.ps1', 'launch.ps1', 'Install Windows.cmd', 'Launch Mini Agent.cmd']) {
+  for (const file of ['install.sh', 'Install.command', 'account-claw', 'verify.mjs',
+    'install.ps1', 'launch.ps1', 'Install Windows.cmd', 'Launch Account Claw.cmd']) {
     await copyFile(path.join(source, 'installer', file), path.join(root, file));
     if (/\.(cmd|ps1)$/.test(file)) {
       const script = await readFile(path.join(root, file), 'utf8');

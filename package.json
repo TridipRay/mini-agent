@@ -1,8 +1,29 @@
 {
-  "name": "mini-agent-local",
-  "version": "0.1.0",
+  "name": "account-claw-local",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.12" },
-  "scripts": { "start": "node server.mjs", "test": "node --test test/*.test.mjs", "probe": "node scripts/probe.mjs", "build:installer": "node scripts/build-installer.mjs" }
+  "engines": {
+    "node": ">=24.16.0 <25 || >=26.1.0"
+  },
+  "scripts": {
+    "start": "node claw/cli.mjs start",
+    "test": "node --test test/*.test.mjs",
+    "probe": "node scripts/probe.mjs",
+    "build:installer": "node scripts/build-installer.mjs",
+    "setup": "node claw/cli.mjs setup",
+    "login": "node claw/cli.mjs login",
+    "claw": "node claw/cli.mjs claw",
+    "postinstall": "node claw/patch-openclaw.mjs node_modules/openclaw"
+  },
+  "dependencies": {
+    "openclaw": "2026.10.3"
+  },
+  "allowScripts": {
+    "openclaw@2026.10.3": true,
+    "esbuild@0.28.2": true,
+    "koffi@3.3.1": true,
+    "protobufjs@7.6.6": true,
+    "@google/genai@2.24.0": true
+  }
 }
