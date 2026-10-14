@@ -12,7 +12,7 @@ export class ClaudeAgent {
   assertIdle() { if (this.busy) throw new Error('A Claude turn is running. Stop it before changing the conversation.'); }
   async signedIn() { await this.auth.load(); if (this.threadId && !this.threads.some(t => t.id === this.threadId && t.accountKey === this.auth.state.selected)) await this.disconnect(); if (!this.auth.state.selected) throw new Error('Sign in to a Claude subscription account first.'); }
   options(record = {}) { return { cwd: record.cwd, env: this.auth.environment, pathToClaudeCodeExecutable: this.binary,
-    settingSources: [], permissionMode: 'default', tools: ['Read', 'Glob', 'Grep', 'Bash', 'Write', 'Edit', 'AskUserQuestion'],
+    settingSources: [], permissionMode: 'default', tools: ['Read', 'Glob', 'Grep', 'Bash', ...(process.platform === 'win32' ? ['PowerShell'] : []), 'Write', 'Edit', 'AskUserQuestion'],
     systemPrompt: { type: 'preset', preset: 'claude_code', ...(record.instructions ? { append: record.instructions } : {}) } }; }
   async models() {
     await this.signedIn();
