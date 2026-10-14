@@ -1,4 +1,5 @@
-import { spawn } from 'node:child_process';
+import { promisify } from 'node:util';
+import { spawn, execFile } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -28,6 +29,11 @@ export async function main(argv = process.argv.slice(2)) {
   const dependencyRoot = path.resolve(path.dirname(binary), '..');
   environment.PATH = `${path.join(dependencyRoot, '.bin')}${path.delimiter}${environment.PATH ?? ''}`;
   const nativeClaude = path.join(dependencyRoot, '@anthropic-ai', `claude-code-${process.platform}-${process.arch}`, process.platform === 'win32' ? 'claude.exe' : 'claude');
+  if (command === 'doctor' || command === 'setup') {
+    const { stdout } = await promisify(execFile)(nativeClaude, ['--version'], { env: environment, timeout: 15000 });
+    if (!stdout.includes('Claude Code')) throw new Error('Private Claude runtime version check failed.');
+    console.log(`Private Claude runtime: ${stdout.trim()}`);
+  }
   if (command === 'login-claude' || command === 'claude-status') {
     await access(nativeClaude);
     const login = spawn(nativeClaude, command === 'login-claude' ? ['auth', 'login', '--claudeai'] : ['auth', 'status', '--json'],
