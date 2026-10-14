@@ -12,7 +12,7 @@ test('release packaging excludes private state and verifies the shipped producti
   const temporary = await mkdtemp(path.join(os.tmpdir(), 'mini-agent-distribution-test-'));
   try {
     execFileSync(process.execPath, [path.join(source, 'scripts/build-installer.mjs'), temporary]);
-    const archive = path.join(temporary, 'Account-Claw-0.2.1.zip');
+    const archive = path.join(temporary, 'Account-Claw-0.2.2.zip');
     const entries = execFileSync('unzip', ['-Z1', archive], { encoding: 'utf8' }).trim().split('\n');
     assert.ok(entries.every(name => !/\.state|test-artifacts|prompt-investigation|node_modules|accounts\.json|threads\.json/.test(name)));
     for (const [platform, expected, excluded] of [
@@ -20,20 +20,20 @@ test('release packaging excludes private state and verifies the shipped producti
       ['Linux', 'install.sh', 'Install.command'],
       ['Windows', 'Install Windows.cmd', 'install.sh'],
     ]) {
-      const filename = `Account-Claw-0.2.1-${platform}.zip`;
+      const filename = `Account-Claw-0.2.2-${platform}.zip`;
       const platformArchive = path.join(temporary, filename);
       const contents = execFileSync('unzip', ['-Z1', platformArchive], { encoding: 'utf8' }).split('\n');
-      assert.ok(contents.includes(`Account-Claw-0.2.1/${expected}`));
-      assert.ok(!contents.includes(`Account-Claw-0.2.1/${excluded}`));
+      assert.ok(contents.includes(`Account-Claw-0.2.2/${expected}`));
+      assert.ok(!contents.includes(`Account-Claw-0.2.2/${excluded}`));
       const sums = await readFile(path.join(temporary, 'SHA256SUMS'), 'utf8');
       assert.ok(sums.includes(`${createHash('sha256').update(await readFile(platformArchive)).digest('hex')}  ${filename}`));
     }
     execFileSync('unzip', ['-q', archive, '-d', temporary]);
-    const bundle = path.join(temporary, 'Account-Claw-0.2.1');
+    const bundle = path.join(temporary, 'Account-Claw-0.2.2');
     const manifest = JSON.parse(await readFile(path.join(bundle, 'manifest.json'), 'utf8'));
-    assert.equal(Object.keys(manifest.files).length, 17);
+    assert.equal(Object.keys(manifest.files).length, 18);
     for (const file of ['Install Windows.cmd', 'install.ps1', 'Launch Account Claw.cmd', 'launch.ps1']) {
-      assert.ok(entries.includes(`Account-Claw-0.2.1/${file}`));
+      assert.ok(entries.includes(`Account-Claw-0.2.2/${file}`));
     }
     for (const [name, hash] of Object.entries(manifest.files)) {
       assert.equal(createHash('sha256').update(await readFile(path.join(bundle, 'payload', name))).digest('hex'), hash);

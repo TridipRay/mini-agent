@@ -6,7 +6,9 @@ This is an integration distribution, not a reimplementation of every OpenClaw su
 
 ## Claude subscription support
 
-Version 0.2.1 adds a private Claude Code 2.1.299 runtime. Use `account-claw login-claude` (or the Sign in to Claude launcher) to complete Claude Code's browser sign-in and select the native Claude backend. `account-claw claude-status` checks the account. OpenClaw delegates to Claude Code; it does not copy or forward the native login tokens. Your ChatGPT login stays available: use the dashboard model selector, or `account-claw claw models set openai/gpt-6.1-sol`, to switch back. Claude sessions use the `claude-cli` provider. Cron jobs can select an explicit Claude model using OpenClaw's `--model` option.
+Version 0.2.2 adds dashboard Claude subscription sign-in under **Settings → Models → Connect provider → Anthropic → Claude subscription (Claude Code)**. Follow the browser link, authorize your subscribed Claude account, and paste the authorization code into the masked dashboard field if prompted. When connected, select a Claude model in the Model dropdown; connection and model selection are separate. You can also reuse an already signed-in native Claude account through the confirmation step.
+
+Version 0.2.1 added a private Claude Code 2.1.299 runtime. Use `account-claw login-claude` (or the Sign in to Claude launcher) to complete Claude Code's browser sign-in and select the native Claude backend. `account-claw claude-status` checks the account. OpenClaw delegates to Claude Code; it does not copy or forward the native login tokens. Your ChatGPT login stays available: use the dashboard model selector, or `account-claw claw models set openai/gpt-6.1-sol`, to switch back. Claude sessions use the `claude-cli` provider. Cron jobs can select an explicit Claude model using OpenClaw's `--model` option.
 
 The Claude login is isolated in the installation's `data/claude` directory. Reinstallation keeps it. Existing gateways must be restarted to pick up the new private runtime and environment. Model API keys, alternate Anthropic endpoints and cloud-provider environment switches are removed from child processes so this account route cannot silently fall back to API billing.
 
@@ -14,7 +16,7 @@ Anthropic's [current plan support](https://support.claude.com/en/articles/150365
 
 ## Install and first use
 
-Download the macOS, Linux, or Windows ZIP from [Account Claw releases](https://github.com/TridipRay/mini-agent/releases/tag/account-claw-v0.2.1). See the [installer guide](installer/README.md) for launch shortcuts. Extract the Account-Claw installer ZIP and run `Install.command` on macOS, `sh install.sh` on Linux, or `Install Windows.cmd` on native Windows. The installer downloads private Node 24.21.0 and pinned OpenClaw dependencies. No existing desktop app or global OpenClaw update is required.
+Download the macOS, Linux, or Windows ZIP from [Account Claw releases](https://github.com/TridipRay/mini-agent/releases/tag/account-claw-v0.2.2). See the [installer guide](installer/README.md) for launch shortcuts. Extract the Account-Claw installer ZIP and run `Install.command` on macOS, `sh install.sh` on Linux, or `Install Windows.cmd` on native Windows. The installer downloads private Node 24.21.0 and pinned OpenClaw dependencies. No existing desktop app or global OpenClaw update is required.
 
 On macOS/Linux:
 

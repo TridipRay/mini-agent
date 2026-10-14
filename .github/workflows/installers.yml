@@ -32,14 +32,14 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          unzip -q downloads/Account-Claw-0.2.1.zip -d extracted
-          mv extracted/Account-Claw-0.2.1 bundle
+          unzip -q downloads/Account-Claw-0.2.2.zip -d extracted
+          mv extracted/Account-Claw-0.2.2 bundle
       - name: Extract Windows package
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          Expand-Archive downloads/Account-Claw-0.2.1.zip extracted
-          Move-Item extracted/Account-Claw-0.2.1 bundle
+          Expand-Archive downloads/Account-Claw-0.2.2.zip extracted
+          Move-Item extracted/Account-Claw-0.2.2 bundle
       - name: Install and validate Unix
         if: runner.os != 'Windows'
         shell: bash

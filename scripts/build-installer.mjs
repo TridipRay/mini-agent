@@ -11,7 +11,7 @@ const { version } = JSON.parse(await readFile(path.join(source, 'package.json'),
 if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Expected a numeric release version.');
 // Explicit allowlist prevents credentials, histories and research captures entering a release.
 const files = ['package-lock.json', 'OPENCLAW-LICENSE.txt', 'package.json', 'server.mjs', 'store.mjs', 'auth.mjs', 'agent.mjs', 'rpc.mjs',
-  'ui/index.html', 'ui/style.css', 'ui/app.mjs', 'scripts/probe.mjs', 'scripts/launch.mjs', 'claw/config.mjs', 'claw/cli.mjs', 'claw/patch-openclaw.mjs', 'claw/install-manifest.mjs'];
+  'ui/index.html', 'ui/style.css', 'ui/app.mjs', 'scripts/probe.mjs', 'scripts/launch.mjs', 'claw/native-claude-login.mjs', 'claw/config.mjs', 'claw/cli.mjs', 'claw/patch-openclaw.mjs', 'claw/install-manifest.mjs'];
 const temporary = await mkdtemp(path.join(os.tmpdir(), 'mini-agent-package-'));
 const name = `Account-Claw-${version}`;
 const root = path.join(temporary, name);
