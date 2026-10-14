@@ -6,7 +6,7 @@ This is an integration distribution, not a reimplementation of every OpenClaw su
 
 ## Install and first use
 
-Extract the Account-Claw installer ZIP and run `Install.command` on macOS, `sh install.sh` on Linux, or `Install Windows.cmd` on native Windows. The installer downloads private Node 24.21.0 and pinned OpenClaw dependencies. No existing desktop app or global OpenClaw update is required.
+Download the macOS, Linux, or Windows ZIP from [Account Claw releases](https://github.com/TridipRay/mini-agent/releases/tag/account-claw-v0.2.0). See the [installer guide](installer/README.md) for launch shortcuts. Extract the Account-Claw installer ZIP and run `Install.command` on macOS, `sh install.sh` on Linux, or `Install Windows.cmd` on native Windows. The installer downloads private Node 24.21.0 and pinned OpenClaw dependencies. No existing desktop app or global OpenClaw update is required.
 
 On macOS/Linux:
 

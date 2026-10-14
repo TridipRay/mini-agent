@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, writeFile, copyFile, chmod, rm, lstat } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, copyFile, chmod, rm, lstat, cp } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -46,4 +46,27 @@ try {
   const checksum = createHash('sha256').update(await readFile(archive)).digest('hex');
   await writeFile(`${archive}.sha256`, `${checksum}  ${path.basename(archive)}\n`);
   console.log(archive);
+  const platformFiles = {
+    macOS: ['install.sh', 'Install.command', 'account-claw', 'verify.mjs'],
+    Linux: ['install.sh', 'account-claw', 'verify.mjs'],
+    Windows: ['install.ps1', 'launch.ps1', 'Install Windows.cmd', 'Launch Account Claw.cmd', 'verify.mjs'],
+  };
+  const checksums = [`${checksum}  ${path.basename(archive)}`];
+  for (const [platform, scripts] of Object.entries(platformFiles)) {
+    const platformRoot = path.join(temporary, platform, name);
+    await mkdir(platformRoot, { recursive: true });
+    // Copy only the public, allowlisted bundle; never the working tree.
+    await cp(path.join(root, 'payload'), path.join(platformRoot, 'payload'), { recursive: true });
+    for (const file of [...scripts, 'manifest.json', 'README.md']) {
+      await copyFile(path.join(root, file), path.join(platformRoot, file));
+      if (scripts.includes(file) && !file.endsWith('.mjs')) await chmod(path.join(platformRoot, file), 0o755);
+    }
+    const filename = `${name}-${platform}.zip`;
+    const staged = path.join(temporary, filename);
+    execFileSync('zip', ['-q', '-r', staged, name], { cwd: path.dirname(platformRoot) });
+    await copyFile(staged, path.join(output, filename));
+    checksums.push(`${createHash('sha256').update(await readFile(staged)).digest('hex')}  ${filename}`);
+    console.log(path.join(output, filename));
+  }
+  await writeFile(path.join(output, 'SHA256SUMS'), checksums.join('\n') + '\n');
 } finally { await rm(temporary, { recursive: true, force: true }); }

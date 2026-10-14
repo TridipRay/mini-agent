@@ -15,6 +15,19 @@ test('release packaging excludes private state and verifies the shipped producti
     const archive = path.join(temporary, 'Account-Claw-0.2.0.zip');
     const entries = execFileSync('unzip', ['-Z1', archive], { encoding: 'utf8' }).trim().split('\n');
     assert.ok(entries.every(name => !/\.state|test-artifacts|prompt-investigation|node_modules|accounts\.json|threads\.json/.test(name)));
+    for (const [platform, expected, excluded] of [
+      ['macOS', 'Install.command', 'Install Windows.cmd'],
+      ['Linux', 'install.sh', 'Install.command'],
+      ['Windows', 'Install Windows.cmd', 'install.sh'],
+    ]) {
+      const filename = `Account-Claw-0.2.0-${platform}.zip`;
+      const platformArchive = path.join(temporary, filename);
+      const contents = execFileSync('unzip', ['-Z1', platformArchive], { encoding: 'utf8' }).split('\n');
+      assert.ok(contents.includes(`Account-Claw-0.2.0/${expected}`));
+      assert.ok(!contents.includes(`Account-Claw-0.2.0/${excluded}`));
+      const sums = await readFile(path.join(temporary, 'SHA256SUMS'), 'utf8');
+      assert.ok(sums.includes(`${createHash('sha256').update(await readFile(platformArchive)).digest('hex')}  ${filename}`));
+    }
     execFileSync('unzip', ['-q', archive, '-d', temporary]);
     const bundle = path.join(temporary, 'Account-Claw-0.2.0');
     const manifest = JSON.parse(await readFile(path.join(bundle, 'manifest.json'), 'utf8'));

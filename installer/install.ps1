@@ -73,6 +73,17 @@ try {
     Set-Content -LiteralPath $temporary -Value $release -Encoding ASCII
     $active = Join-Path $Prefix 'active-release.txt'
     if (Test-Path $active) { [IO.File]::Replace($temporary, $active, $null) } else { [IO.File]::Move($temporary, $active) }
+    # Per-user Start Menu shortcuts need no administrator access.
+    $menu = Join-Path ([Environment]::GetFolderPath('Programs')) 'Account Claw'
+    New-Item -ItemType Directory -Force -Path $menu | Out-Null
+    $shell = New-Object -ComObject WScript.Shell
+    foreach ($entry in @(@('1 - Sign in to ChatGPT', 'login'), @('2 - Start Account Claw', 'start'), @('3 - Open Dashboard', 'dashboard'))) {
+        $shortcut = $shell.CreateShortcut((Join-Path $menu ($entry[0] + '.lnk')))
+        $shortcut.TargetPath = Join-Path $PSHOME 'powershell.exe'
+        $shortcut.Arguments = '-NoProfile -ExecutionPolicy Bypass -File "' + (Join-Path $Prefix 'bin/launch.ps1') + '" -Command ' + $entry[1]
+        $shortcut.WorkingDirectory = $Prefix
+        $shortcut.Save()
+    }
     Write-Host "Installed. Open $Prefix\bin\Launch Account Claw.cmd, then run launch.ps1 -Command login to authorize ChatGPT."
 } finally {
     try {

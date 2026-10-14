@@ -1,30 +1,30 @@
-# Install Account Claw 0.2.0
+# Install Account Claw
 
-The package sets up the full OpenClaw 2026.10.3 runtime with a private Node 24.21.0 installation and an isolated account-claw profile. It does not update an existing OpenClaw or import credentials. Internet access is required to download official runtimes and npm dependencies.
+Download the ZIP for your operating system and extract it before running the installer. Internet access is required. Node.js and OpenClaw are installed privately; no API key or administrator login is needed.
 
-On macOS, extract the ZIP and run Install.command. On Linux, run `sh install.sh`. On Windows x64/ARM64, run Install Windows.cmd. The Windows script uses per-user ACL protection; the Unix script uses owner-only data directories. No global npm installation or shell-profile change is made. Native Windows and Linux paths require testing on those operating systems. Scripts are not signed/notarized application installers.
+| Platform | Install | Sign in and launch |
+| --- | --- | --- |
+| macOS (Apple Silicon / Intel) | Double-click `Install.command` | Open `~/.local/share/account-claw/bin` in Finder. Run **Sign in to ChatGPT.command**, then **Launch Account Claw.command**, then **Open Dashboard.command**. |
+| Linux (ARM64 / x64) | Run `sh install.sh` in the extracted folder | Use the commands below. |
+| Windows (ARM64 / x64) | Double-click `Install Windows.cmd` | Open **Account Claw** in the Start menu. Run shortcuts **1**, **2**, then **3**. |
 
-Default install locations:
-
-- macOS/Linux: `~/.local/share/account-claw`
-- Windows: `%LOCALAPPDATA%\AccountClaw`
-
-First authorize ChatGPT with the installed launcher's `login` command. On macOS/Linux:
+Linux commands (open a second terminal for the dashboard):
 
 ```sh
 "$HOME/.local/share/account-claw/bin/account-claw" login
 "$HOME/.local/share/account-claw/bin/account-claw" start
+# In a second terminal:
+"$HOME/.local/share/account-claw/bin/account-claw" dashboard
 ```
 
-In a second terminal, use `account-claw dashboard` (with the same full launcher path) to open the local authenticated UI. On Windows, use:
+Sign-in opens an authorization page where you choose your ChatGPT account. Keep the gateway terminal open while using the tool or running scheduled jobs. On later launches, skip sign-in unless the account needs reconnection. The dashboard uses your default browser.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\AccountClaw\bin\launch.ps1" -Command login
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\AccountClaw\bin\launch.ps1" -Command start
-```
+The private runtime is OpenClaw 2026.10.3 and Node.js 24.21.0. Existing OpenClaw installations and credentials are kept separate. Default installation directories are `~/.local/share/account-claw` (macOS/Linux) and `%LOCALAPPDATA%\AccountClaw` (Windows). The universal ZIP contains installers for all platforms.
 
-Then call the same launcher with `-Command dashboard` in another window. These launchers bypass PowerShell execution policy only for their subprocess; managed application-control policies can still block them.
+These are script installers, not signed/notarized app bundles. If macOS or your organization's Windows policy blocks a script, review it and follow your machine's normal approval process. Windows shortcuts bypass PowerShell execution policy for that subprocess only; they do not override managed application-control policies.
 
-The `claw` command passes remaining arguments to the complete OpenClaw CLI, including `cron`, plugins, browser, channels and memory commands. `service-install` installs a background Gateway service deliberately; keep your machine awake for scheduled jobs. It is not enabled during setup. Model account sign-in and live inference must be checked after installation. The install check validates configuration without account or model requests.
+For a custom location, run `sh install.sh --prefix /absolute/path` or `install.ps1 -Prefix C:\Tools\AccountClaw`. Stop the gateway before reinstalling. Reinstallation preserves data and workspace and retains previous releases.
 
-A custom absolute directory can be specified with `sh install.sh --prefix /path/account-claw` or `install.ps1 -Prefix C:\Tools\AccountClaw`. Reinstallation preserves data/workspace and retains older releases. Stop the Gateway before reinstalling. To uninstall, stop/uninstall its service if used, revoke account access, then remove the install directory. Persistent user workspaces will be deleted with that directory. Review tool permissions before running unattended tasks.
+Advanced CLI commands use the launcher followed by `claw`, e.g. `account-claw claw cron list`. `service-install` deliberately installs a background gateway service; it is not enabled during installation. Scheduled jobs require a running gateway and an awake machine. Review permissions before unattended tasks.
+
+To uninstall, stop the gateway and uninstall its service if enabled, revoke account access, and remove the installation directory. This also deletes its stored conversations and workspace. Remove the Windows Start Menu folder separately.

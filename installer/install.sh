@@ -15,7 +15,7 @@ case "$(uname -s)-$(uname -m)" in
   Darwin-x86_64) platform=darwin-x64; checksum=1462cb3b3046b815cf8ea436d3da450ec1a9f11dac7e5a46b0ada5305d7e8097 ;;
   Linux-aarch64|Linux-arm64) platform=linux-arm64; checksum=724282c3b43aec998aa9527380465b45d229e021b58035f5f4f63095eabfe5d5 ;;
   Linux-x86_64) platform=linux-x64; checksum=6e1db87ef58b8819e5d5402eff1536491b18edd8eb7bee5ef7897876e88dc5ff ;;
-  *) echo 'Supported: macOS/Linux on Apple Silicon/ARM64 or x86-64. Windows: use WSL2.' >&2; exit 1 ;;
+  *) echo 'Supported: macOS/Linux on Apple Silicon/ARM64 or x86-64. Windows: use Install Windows.cmd.' >&2; exit 1 ;;
 esac
 for command in curl tar mktemp; do command -v "$command" >/dev/null || { echo "Required command missing: $command" >&2; exit 1; }; done
 if [ -e "$prefix" ] && [ ! -f "$prefix/.account-claw-install" ]; then
@@ -85,5 +85,10 @@ JS
 if [ "$(uname -s)" = Darwin ]; then
   cp "$prefix/bin/account-claw" "$prefix/bin/Launch Account Claw.command"
   chmod 755 "$prefix/bin/Launch Account Claw.command"
+  for name in 'Sign in to ChatGPT.command' 'Open Dashboard.command'; do
+    cp "$prefix/bin/account-claw" "$prefix/bin/$name"
+    chmod 755 "$prefix/bin/$name"
+  done
+  echo "Finder launchers: $prefix/bin (Sign in, Launch, Open Dashboard)."
 fi
 printf '\nInstalled. Start with:\n  "%s/bin/account-claw"\n\nRun the launcher with login to authorize ChatGPT, then start and dashboard.\n' "$prefix"

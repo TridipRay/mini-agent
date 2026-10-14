@@ -6,4 +6,10 @@ export PATH="$release/runtime/bin:$PATH"
 export ACCOUNT_CLAW_OPENCLAW="$release/backend/node_modules/openclaw/openclaw.mjs"
 export ACCOUNT_CLAW_DATA_DIR="$root/data"
 export ACCOUNT_CLAW_WORKSPACE_DIR="$root/workspace"
+if [ "$#" -eq 0 ]; then
+  case "$(basename -- "$0")" in
+    'Sign in to ChatGPT.command') set -- login ;;
+    'Open Dashboard.command') set -- dashboard ;;
+  esac
+fi
 exec "$release/runtime/bin/node" "$release/app/claw/cli.mjs" "$@"
